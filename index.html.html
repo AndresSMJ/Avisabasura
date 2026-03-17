@@ -1,0 +1,408 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+#app{width:100%;max-width:700px;margin:0 auto;font-family:var(--font-sans)}
+#scene{position:relative;width:100%;height:340px;overflow:hidden;border-radius:12px;border:2.5px solid #444;background:#87CEEB;user-select:none}
+.sky{position:absolute;inset:0;background:linear-gradient(180deg,#4A90C4 0%,#A8D8F0 55%,#A8D8F0 100%)}
+.ground{position:absolute;bottom:0;left:0;right:0;height:96px;background:#4E7E30}
+.road{position:absolute;bottom:24px;left:0;right:0;height:52px;background:#5A5A5A}
+.sidewalk{position:absolute;bottom:76px;left:0;right:0;height:8px;background:#B8A898}
+.stripe{position:absolute;bottom:47px;height:7px;background:#EEE;border-radius:2px;width:48px;opacity:.8}
+.bld{position:absolute;bottom:76px}
+.roof{position:absolute;border-style:solid;border-color:transparent transparent #A02018 transparent}
+.wall{border:2px solid #6B5020;border-radius:2px;position:relative}
+.door{position:absolute;bottom:0;background:#7B4020;border-radius:2px 2px 0 0}
+.win{position:absolute;background:#ADD8E6;border:1.5px solid #777;border-radius:2px}
+#person{position:absolute;bottom:77px;left:38px;z-index:12;transition:left .6s ease-in-out}
+.ph{width:16px;height:16px;background:#FDBCB4;border-radius:50%;border:1.5px solid #c08060;margin:0 auto}
+.pb{width:14px;height:20px;background:#2855CC;border-radius:3px 3px 0 0;margin:0 auto;position:relative}
+.pl{display:flex;gap:2px;justify-content:center}
+.pleg{width:5px;height:12px;background:#1A3590;border-radius:0 0 2px 2px}
+.parm{position:absolute;right:-9px;top:3px;width:9px;height:5px;background:#FDBCB4;border-radius:3px;transform-origin:left center;transform:rotate(30deg)}
+#phone{position:absolute;right:-18px;top:-2px;width:10px;height:15px;background:#222;border-radius:2px;border:1.5px solid #555;opacity:0;transition:opacity .4s}
+#phone-screen{position:absolute;inset:1.5px;background:#1a1a2e;border-radius:1px;overflow:hidden}
+#phone-notif{position:absolute;inset:0;background:#E85020;display:flex;align-items:center;justify-content:center;font-size:5px;color:#fff;opacity:0;transition:opacity .3s}
+#notif-bubble{position:absolute;left:0px;bottom:58px;background:rgba(255,255,255,.97);border:2px solid #E85020;border-radius:10px;padding:5px 8px;font-size:10.5px;font-weight:600;color:#333;white-space:nowrap;z-index:40;opacity:0;transform:scale(.7) translateY(8px);transition:all .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;line-height:1.4}
+#notif-bubble.show{opacity:1;transform:scale(1) translateY(0)}
+#notif-bubble::after{content:'';position:absolute;bottom:-7px;left:10px;border:4px solid transparent;border-top-color:#E85020}
+#bag{position:absolute;bottom:77px;left:50px;z-index:9;opacity:0;transition:opacity .5s}
+.bagbody{width:15px;height:20px;background:#2a2a2a;border-radius:4px 4px 2px 2px;border:1.5px solid #555;position:relative}
+.bagknot{position:absolute;top:-5px;left:2px;width:11px;height:6px;background:#444;border-radius:50% 50% 0 0}
+#camPole{position:absolute;bottom:76px;right:60px;z-index:15}
+.cpole{width:5px;height:50px;background:#555;margin:0 auto;border-radius:2px}
+.carm{width:26px;height:5px;background:#444;border-radius:2px;position:absolute;top:8px;right:0}
+.cbody{position:absolute;top:0;right:0;width:22px;height:13px;background:#1a1a1a;border-radius:3px;border:1.5px solid #555}
+.clens{position:absolute;top:50%;left:2px;transform:translateY(-50%);width:9px;height:9px;background:#0d0d2e;border-radius:50%;border:1.5px solid #333}
+#cled{width:5px;height:5px;background:#4CAF50;border-radius:50%;position:absolute;top:2px;right:2px;transition:background .2s}
+#cled.hot{background:#FF5722;box-shadow:0 0 5px #FF5722}
+#fov{position:absolute;top:6px;right:22px;width:0;height:0;border-style:solid;border-width:0 0 100px 70px;border-color:transparent transparent rgba(255,200,0,.15) transparent;pointer-events:none;transition:border-color .3s}
+#fov.hot{border-color:transparent transparent rgba(255,80,0,.35) transparent}
+
+#truck{position:absolute;bottom:26px;z-index:10;will-change:left}
+#truck-inner{transform:scaleX(-1);width:150px}
+.tk{position:relative;width:150px;height:64px}
+.t-body{position:absolute;left:0;top:14px;width:96px;height:46px;background:#E05018;border:2.5px solid #2a2a2a;border-radius:4px 0 0 4px}
+.t-stripe{position:absolute;top:10px;left:4px;width:86px;height:6px;background:rgba(255,255,255,.22);border-radius:2px}
+.t-label{position:absolute;top:16px;left:18px;font-size:8px;color:#fff;font-weight:700;letter-spacing:1.5px;transform:scaleX(-1)}
+.t-back{position:absolute;left:0;top:0;width:14px;height:46px;background:#C03010;border-right:2px solid #2a2a2a;border-radius:4px 0 0 4px}
+.t-back-line{position:absolute;left:4px;width:5px;height:2px;background:rgba(0,0,0,.3);border-radius:1px}
+.t-cab{position:absolute;right:0;top:0;width:52px;height:60px;background:#F07848;border:2.5px solid #2a2a2a;border-radius:0 10px 4px 0}
+.t-wind{position:absolute;top:7px;right:6px;width:30px;height:20px;background:#ADD8E6;border:1.5px solid #555;border-radius:2px 6px 2px 2px}
+.t-mirror{position:absolute;top:18px;right:-7px;width:6px;height:10px;background:#D06030;border:1.5px solid #2a2a2a;border-radius:2px}
+.t-grill{position:absolute;bottom:8px;right:4px;width:18px;height:12px;background:#333;border-radius:2px;border:1px solid #555}
+.t-grill-line{position:absolute;left:3px;width:12px;height:1.5px;background:#555;border-radius:1px}
+.t-light{position:absolute;top:32px;right:2px;width:8px;height:6px;background:#FFF5AA;border:1px solid #888;border-radius:1px 3px 3px 1px}
+.t-exhaust{position:absolute;top:-8px;right:18px;width:5px;height:12px;background:#555;border-radius:2px 2px 0 0}
+.t-wheel{position:absolute;bottom:-13px;width:28px;height:28px;background:#1a1a1a;border-radius:50%;border:4px solid #888}
+.t-wheel-hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:10px;height:10px;background:#aaa;border-radius:50%;border:2px solid #666}
+
+#scan-flash{position:absolute;inset:0;background:rgba(255,100,0,0);pointer-events:none;transition:background .2s;border-radius:10px}
+#scorebox{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.65);color:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:600;z-index:35}
+#ptsflash{position:absolute;top:50px;right:14px;font-size:22px;font-weight:700;color:#FFD700;text-shadow:0 1px 4px rgba(0,0,0,.6);z-index:50;opacity:0;pointer-events:none;transition:opacity .7s,top .7s}
+#sbar{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);color:#ddd;font-size:11px;padding:5px 10px;display:flex;align-items:center;gap:7px;z-index:30}
+#sdot{width:8px;height:8px;border-radius:50%;background:#4CAF50;flex-shrink:0}
+#sdot.alert{background:#FF5722;animation:blink .5s infinite alternate}
+@keyframes blink{to{opacity:.2}}
+#controls{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;align-items:center}
+.btn{padding:7px 15px;border:1.5px solid var(--color-border-secondary);border-radius:8px;font-size:13px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-primary);transition:background .15s}
+.btn:hover:not(:disabled){background:var(--color-background-secondary)}
+.btn.primary{background:#E85020;color:#fff;border-color:#E85020}
+.btn.primary:hover:not(:disabled){background:#C84010}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+#spdwrap{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-text-secondary)}
+#info{font-size:12px;color:var(--color-text-secondary);line-height:1.8;margin-top:4px}
+#info b{color:var(--color-text-primary);font-weight:500}
+#quiz-sec{margin-top:10px;display:none}
+.qlbl{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+#qbox{background:var(--color-background-secondary);border-radius:12px;padding:14px;border:.5px solid var(--color-border-tertiary)}
+.qtxt{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px}
+.qopts{display:flex;flex-direction:column;gap:6px}
+.qopt{padding:8px 12px;border:1.5px solid var(--color-border-secondary);border-radius:8px;font-size:13px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-primary);text-align:left;transition:all .15s}
+.qopt:hover:not(:disabled){background:var(--color-background-secondary)}
+.qopt.ok{background:#e8f5e9;border-color:#4CAF50;color:#1b5e20}
+.qopt.bad{background:#fdecea;border-color:#f44336;color:#b71c1c}
+.qfb{font-size:12px;margin-top:8px;padding:6px 10px;border-radius:6px;font-weight:500}
+.qfb.ok{background:#e8f5e9;color:#2e7d32}
+.qfb.bad{background:#fdecea;color:#c62828}
+</style>
+
+<div id="app">
+<div id="scene">
+  <div class="sky"></div>
+  <div class="ground"></div>
+  <div class="road">
+    <div class="stripe" style="left:3%"></div><div class="stripe" style="left:18%"></div>
+    <div class="stripe" style="left:33%"></div><div class="stripe" style="left:48%"></div>
+    <div class="stripe" style="left:63%"></div><div class="stripe" style="left:78%"></div>
+    <div class="stripe" style="left:93%"></div>
+  </div>
+  <div class="sidewalk"></div>
+  <div id="scan-flash"></div>
+
+  <div class="bld" style="left:0px">
+    <div class="roof" style="border-width:0 44px 34px 44px;top:-34px;left:0"></div>
+    <div class="wall" style="width:88px;height:64px;background:#D4B870">
+      <div class="door" style="width:18px;height:30px;left:35px"></div>
+      <div class="win" style="width:16px;height:14px;top:10px;left:8px"></div>
+      <div class="win" style="width:16px;height:14px;top:10px;right:8px"></div>
+    </div>
+  </div>
+  <div class="bld" style="left:100px">
+    <div style="width:30px;height:36px;background:#2D7D2D;border-radius:50%;position:absolute;top:-34px;left:-5px"></div>
+    <div style="width:8px;height:18px;background:#7B5020;margin:0 auto"></div>
+  </div>
+  <div class="bld" style="left:140px">
+    <div class="roof" style="border-width:0 36px 28px 36px;top:-28px;left:0"></div>
+    <div class="wall" style="width:72px;height:56px;background:#C8A060">
+      <div class="door" style="width:16px;height:26px;left:28px"></div>
+      <div class="win" style="width:14px;height:12px;top:8px;left:7px"></div>
+      <div class="win" style="width:14px;height:12px;top:8px;right:7px"></div>
+    </div>
+  </div>
+  <div class="bld" style="right:130px">
+    <div style="width:26px;height:30px;background:#2D7D2D;border-radius:50%;position:absolute;top:-28px;left:-3px"></div>
+    <div style="width:7px;height:15px;background:#7B5020;margin:0 auto"></div>
+  </div>
+  <div class="bld" style="right:0px">
+    <div class="roof" style="border-width:0 40px 30px 40px;top:-30px;left:0"></div>
+    <div class="wall" style="width:80px;height:58px;background:#CCA858">
+      <div class="door" style="width:17px;height:27px;left:31px"></div>
+      <div class="win" style="width:15px;height:13px;top:9px;left:7px"></div>
+      <div class="win" style="width:15px;height:13px;top:9px;right:7px"></div>
+    </div>
+  </div>
+
+  <div id="camPole">
+    <div id="fov"></div>
+    <div class="cpole">
+      <div class="carm">
+        <div class="cbody"><div class="clens"></div><div id="cled"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bag"><div class="bagbody"><div class="bagknot"></div></div></div>
+
+  <div id="person">
+    <div style="position:relative">
+      <div id="notif-bubble">🔔 ¡El camión se acerca!<br>¡Saca la basura ahora!</div>
+      <div class="ph"></div>
+      <div class="pb">
+        <div class="parm"></div>
+        <div id="phone"><div id="phone-screen"><div id="phone-notif">🔔</div></div></div>
+      </div>
+      <div class="pl"><div class="pleg"></div><div class="pleg"></div></div>
+    </div>
+  </div>
+
+ 
+  <div id="truck">
+    <div id="truck-inner">
+      <div class="tk">
+        <div class="t-exhaust"></div>
+        <div class="t-body">
+          <div class="t-stripe"></div>
+          <div class="t-label">ASEO</div>
+          <div class="t-back">
+            <div class="t-back-line" style="top:8px"></div>
+            <div class="t-back-line" style="top:14px"></div>
+            <div class="t-back-line" style="top:20px"></div>
+            <div class="t-back-line" style="top:26px"></div>
+            <div class="t-back-line" style="top:32px"></div>
+          </div>
+        </div>
+        <div class="t-cab">
+          <div class="t-wind"></div>
+          <div class="t-mirror"></div>
+          <div class="t-light"></div>
+          <div class="t-grill">
+            <div class="t-grill-line" style="top:3px"></div>
+            <div class="t-grill-line" style="top:7px"></div>
+          </div>
+        </div>
+        <div class="t-wheel" style="left:12px"><div class="t-wheel-hub"></div></div>
+        <div class="t-wheel" style="left:108px"><div class="t-wheel-hub"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="scorebox">⭐ <span id="sval">0</span> pts</div>
+  <div id="ptsflash">+10</div>
+  <div id="sbar"><div id="sdot"></div><span id="stxt">Presiona Iniciar para comenzar...</span></div>
+</div>
+
+<div id="controls">
+  <button class="btn primary" id="btnStart" onclick="startSim()">▶ Iniciar simulación</button>
+  <button class="btn" id="btnReset" onclick="resetSim()" disabled>↺ Reiniciar</button>
+  <button class="btn" id="btnQuiz" onclick="openQuiz()" disabled>📝 Quiz interactivo</button>
+  <div id="spdwrap">
+    <span>Velocidad:</span>
+    <input type="range" id="spd" min="1" max="4" value="2" step="1" style="width:80px">
+    <span id="spdlbl">Normal</span>
+  </div>
+</div>
+
+<div id="info">
+  📷 <b>Cámara (derecha)</b>: detecta el camión al pasar ·
+  🔔 <b>Notificación</b>: llega al celular del vecino (izquierda) ·
+  🚶 <b>Vecino</b>: sale y pone la bolsa en la acera ·
+  🗑️ <b>Bolsa</b>: desaparece cuando el camión pasa frente al vecino ·
+  ⭐ <b>Puntos</b>: +10 por entrega, +10 por quiz
+</div>
+
+<div id="quiz-sec">
+  <div class="qlbl" style="margin-top:12px">Quiz interactivo — Manejo de residuos</div>
+  <div id="qbox"></div>
+</div>
+</div>
+
+<script>
+const spdMap={1:'Lento',2:'Normal',3:'Rápido',4:'Turbo'};
+document.getElementById('spd').oninput=e=>document.getElementById('spdlbl').textContent=spdMap[e.target.value];
+
+let animId=null,running=false,detected=false,personWalked=false,bagOnStreet=false,bagPickedUp=false;
+let truckPx=0,score=0,qIdx=0;
+const SW=()=>document.getElementById('scene').offsetWidth;
+
+function setStatus(t,alert=false){
+  document.getElementById('stxt').textContent=t;
+  document.getElementById('sdot').className=alert?'alert':'';
+}
+function flashPts(){
+  const el=document.getElementById('ptsflash');
+  el.style.opacity='1';el.style.top='44px';
+  setTimeout(()=>{el.style.opacity='0';el.style.top='58px';},900);
+}
+function addScore(n){score+=n;document.getElementById('sval').textContent=score;flashPts();}
+
+function personLeftPx(){
+  const p=document.getElementById('person');
+  const s=document.getElementById('scene');
+  return p.getBoundingClientRect().left-s.getBoundingClientRect().left;
+}
+function camX(){
+  const c=document.getElementById('camPole');
+  const s=document.getElementById('scene');
+  return c.getBoundingClientRect().left-s.getBoundingClientRect().left+5;
+}
+function placeBagAtPerson(){
+  const px=personLeftPx();
+  document.getElementById('bag').style.left=(px+2)+'px';
+  document.getElementById('bag').style.bottom='77px';
+}
+
+function startSim(){
+  document.getElementById('btnStart').disabled=true;
+  document.getElementById('btnReset').disabled=false;
+  running=true;detected=false;personWalked=false;bagOnStreet=false;bagPickedUp=false;
+
+  truckPx=SW()+10;
+  document.getElementById('truck').style.left=truckPx+'px';
+  document.getElementById('phone').style.opacity='1';
+  setStatus('🚛 Camión entrando desde la derecha...');
+  animId=requestAnimationFrame(loop);
+}
+
+function loop(){
+  if(!running)return;
+  const spd=parseInt(document.getElementById('spd').value);
+  const vel=[0,0.9,1.5,2.4,3.5][spd];
+
+  truckPx-=vel;
+  document.getElementById('truck').style.left=truckPx+'px';
+
+  const cx=camX();
+  
+  if(!detected && truckPx<=cx+20 && truckPx>=cx-80){
+    detected=true;
+    onDetect();
+  }
+
+ 
+  if(bagOnStreet&&!bagPickedUp){
+    const px=personLeftPx();
+    if(truckPx<=px+80&&truckPx+150>=px){
+      bagPickedUp=true;
+      pickupBag();
+    }
+  }
+
+
+  if(truckPx<-160){
+    cancelAnimationFrame(animId);
+    running=false;
+    if(bagPickedUp) setStatus('✅ ¡Basura recogida! El sistema AvisaBasura funcionó perfecto.');
+    else if(detected) setStatus('⚠️ Notificación enviada pero el vecino no alcanzó.');
+    else setStatus('❌ El camión pasó sin ser detectado.');
+    document.getElementById('btnQuiz').disabled=false;
+    return;
+  }
+  animId=requestAnimationFrame(loop);
+}
+
+function onDetect(){
+  document.getElementById('cled').classList.add('hot');
+  document.getElementById('fov').classList.add('hot');
+  const fl=document.getElementById('scan-flash');
+  fl.style.background='rgba(255,100,0,0.12)';
+  setTimeout(()=>fl.style.background='rgba(255,100,0,0)',400);
+  setStatus('📷 ¡Cámara detectó el camión! Enviando notificación...',true);
+  setTimeout(()=>{
+    document.getElementById('phone-notif').style.opacity='1';
+    document.getElementById('notif-bubble').classList.add('show');
+    setStatus('🔔 "¡El camión se acerca! ¡Saca la basura ahora!"',true);
+    setTimeout(()=>{
+      document.getElementById('notif-bubble').classList.remove('show');
+      document.getElementById('phone-notif').style.opacity='0';
+      personWalksOut();
+    },1400);
+  },500);
+}
+
+function personWalksOut(){
+  personWalked=true;
+  setStatus('🚶 El vecino sale a poner la bolsa...');
+  document.getElementById('person').style.left='55px';
+  setTimeout(()=>{
+    placeBagAtPerson();
+    bagOnStreet=true;
+    document.getElementById('bag').style.opacity='1';
+    setTimeout(()=>{
+      document.getElementById('person').style.left='30px';
+      setStatus('✅ Bolsa en la acera. Esperando el camión...');
+    },700);
+  },650);
+}
+
+function pickupBag(){
+  document.getElementById('bag').style.opacity='0';
+  addScore(10);
+  setStatus('🗑️ ¡El camión recogió la bolsa al pasar frente al vecino! +10 puntos.');
+}
+
+function resetSim(){
+  cancelAnimationFrame(animId);
+  running=false;detected=false;personWalked=false;bagOnStreet=false;bagPickedUp=false;
+  score=0;qIdx=0;
+  document.getElementById('sval').textContent='0';
+  document.getElementById('cled').classList.remove('hot');
+  document.getElementById('fov').classList.remove('hot');
+  document.getElementById('notif-bubble').classList.remove('show');
+  document.getElementById('phone').style.opacity='0';
+  document.getElementById('phone-notif').style.opacity='0';
+  truckPx=SW()+10;
+  document.getElementById('truck').style.left=truckPx+'px';
+  const person=document.getElementById('person');
+  person.style.transition='none';
+  setTimeout(()=>person.style.transition='left .6s ease-in-out',50);
+  person.style.left='38px';
+  const bag=document.getElementById('bag');
+  bag.style.opacity='0';bag.style.left='50px';
+  document.getElementById('scan-flash').style.background='rgba(255,100,0,0)';
+  document.getElementById('btnStart').disabled=false;
+  document.getElementById('btnQuiz').disabled=true;
+  document.getElementById('quiz-sec').style.display='none';
+  document.getElementById('qbox').innerHTML='';
+  setStatus('Reiniciado. Presiona Iniciar para volver a simular.');
+}
+
+const Qs=[
+  {q:"¿Qué ocurre cuando el camión pasa frente a la cámara?",opts:["Suena una alarma","La IA detecta el vehículo y envía la notificación","El camión se detiene","La cámara toma una foto"],ans:1,fb:"¡Correcto! La IA detecta el camión y dispara la notificación al instante."},
+  {q:"¿Por qué el vecino está más lejos que la cámara?",opts:["Por estética","Para tener tiempo de reaccionar y sacar la basura","Porque la cámara lo espanta","No importa"],ans:1,fb:"¡Exacto! La distancia le da tiempo al vecino de salir con la bolsa."},
+  {q:"¿Cuándo desaparece la bolsa de basura?",opts:["Al iniciar","Cuando el camión pasa frente al vecino","Al finalizar","Cuando el vecino regresa"],ans:1,fb:"¡Correcto! La bolsa desaparece cuando el camión pasa justo frente al vecino."},
+  {q:"¿Qué tecnología recibe la notificación en el celular?",opts:["Llamada telefónica","Notificación push del sistema","Mensaje en papel","Radio comunitaria"],ans:1,fb:"¡Muy bien! El sistema envía una notificación push al celular del vecino."},
+  {q:"¿Cuál ODS está más relacionado con AvisaBasura?",opts:["ODS 4 Educación","ODS 11 Ciudades sostenibles","ODS 2 Hambre cero","ODS 7 Energía limpia"],ans:1,fb:"¡Correcto! El ODS 11 busca ciudades sostenibles e inclusivas."}
+];
+
+function openQuiz(){
+  document.getElementById('quiz-sec').style.display='block';
+  renderQ();
+  document.getElementById('quiz-sec').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function renderQ(){
+  if(qIdx>=Qs.length){
+    document.getElementById('qbox').innerHTML='<div class="qfb ok" style="font-size:14px">🎉 ¡Quiz completado! Puntuación total: <strong>'+score+' puntos</strong></div>';
+    return;
+  }
+  const d=Qs[qIdx];
+  document.getElementById('qbox').innerHTML=
+    '<div class="qtxt">Pregunta '+(qIdx+1)+'/'+Qs.length+': '+d.q+'</div>'+
+    '<div class="qopts">'+d.opts.map((o,i)=>'<button class="qopt" onclick="ansQ('+i+')">'+o+'</button>').join('')+'</div>'+
+    '<div id="qfb"></div>';
+}
+function ansQ(i){
+  const d=Qs[qIdx];
+  document.querySelectorAll('.qopt').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('qfb');
+  if(i===d.ans){
+    document.querySelectorAll('.qopt')[i].classList.add('ok');
+    fb.innerHTML='<div class="qfb ok">✅ '+d.fb+'</div>';
+    addScore(10);
+  } else {
+    document.querySelectorAll('.qopt')[i].classList.add('bad');
+    document.querySelectorAll('.qopt')[d.ans].classList.add('ok');
+    fb.innerHTML='<div class="qfb bad">❌ Incorrecto. Correcta: <strong>'+d.opts[d.ans]+'</strong> — '+d.fb+'</div>';
+  }
+  setTimeout(()=>{qIdx++;renderQ();},2600);
+}
+</script>
